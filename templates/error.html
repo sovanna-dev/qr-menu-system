@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error - Restaurant Menu</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .error-box {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .error-code {
+            font-size: 72px;
+            font-weight: bold;
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+        .message {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .home-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-box">
+        <div class="error-code">{{ error_code }}</div>
+        <div class="message">{{ message }}</div>
+        <a href="/" class="home-btn">🏠 Go to Homepage</a>
+    </div>
+</body>
+</html>

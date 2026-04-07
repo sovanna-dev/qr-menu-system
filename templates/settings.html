@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restaurant Settings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .color-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .color-input input[type="color"] {
+            width: 60px;
+            height: 50px;
+            padding: 5px;
+            cursor: pointer;
+        }
+        
+        .color-input span {
+            flex: 1;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .preview {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .preview-box {
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .nav {
+            background: #f5f5f5;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .nav a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 10px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .nav a:hover {
+            background: #e0e0e0;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: fadeOut 3s forwards;
+        }
+        
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
+        
+        .info-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ Restaurant Settings</h1>
+            <p>Customize how your restaurant appears to customers</p>
+        </div>
+        
+        <div class="nav">
+            <a href="/admin">📝 Menu Manager</a>
+            <a href="/dashboard">📋 Orders</a>
+            <a href="/settings">⚙️ Settings</a>
+            <a href="/backup">💾 Backups</a>
+            <a href="/logout" style="background: #dc3545; color: white;">🚪 Logout</a>
+        </div>
+        
+        <div class="content">
+            {% if request.args.get('saved') %}
+            <div class="success-message">
+                ✅ Settings saved successfully! Check the customer menu to see changes.
+            </div>
+            {% endif %}
+            
+            <div class="preview">
+                <h3>Live Preview</h3>
+                <div class="preview-box" id="previewBox">
+                    <strong id="previewName">My Restaurant</strong><br>
+                    <small id="previewHours">Mon-Sun: 11am - 10pm</small>
+                </div>
+            </div>
+            
+            <form method="POST" action="/save_settings" onsubmit="updatePreview()">
+                <div class="form-group">
+                    <label>🏪 Restaurant Name</label>
+                    <input type="text" name="restaurant_name" id="restaurant_name" 
+                           value="{{ settings[1] if settings else 'My Restaurant' }}" required>
+                    <div class="info-text">This name appears at the top of your menu</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>⏰ Opening Hours</label>
+                    <textarea name="opening_hours" id="opening_hours" rows="2" 
+                              placeholder="Mon-Fri: 11am-10pm&#10;Sat-Sun: 12pm-11pm">{{ settings[2] if settings else '' }}</textarea>
+                    <div class="info-text">Customers can see when you're open</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>📞 Phone Number</label>
+                    <input type="tel" name="phone" id="phone" 
+                           value="{{ settings[3] if settings else '' }}" placeholder="+1 234 567 890">
+                    <div class="info-text">Customers can call to place orders</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>📍 Address</label>
+                    <textarea name="address" id="address" rows="2" 
+                              placeholder="123 Main Street, City, State">{{ settings[4] if settings else '' }}</textarea>
+                    <div class="info-text">Show customers where to pick up orders</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>🎨 Brand Color (Buttons & Highlights)</label>
+                    <div class="color-input">
+                        <input type="color" name="logo_color" id="logo_color" 
+                               value="{{ settings[5] if settings else '#ff6b35' }}">
+                        <span id="logoColorValue">{{ settings[5] if settings else '#ff6b35' }}</span>
+                    </div>
+                    <div class="info-text">This color appears on buttons and highlights</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>🎨 Accent Color (Backgrounds)</label>
+                    <div class="color-input">
+                        <input type="color" name="accent_color" id="accent_color" 
+                               value="{{ settings[6] if settings else '#28a745' }}">
+                        <span id="accentColorValue">{{ settings[6] if settings else '#28a745' }}</span>
+                    </div>
+                    <div class="info-text">Secondary color for backgrounds and accents</div>
+                </div>
+                
+                <h3 style="margin-top: 30px;">⏱️ Preparation Time Settings</h3>
+                <p style="font-size: 12px; color: #666;">How many minutes does each item take to prepare?</p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                    <div>
+                        <label>Burger (minutes)</label>
+                        <input type="number" name="burger_time" value="8" min="1" max="30">
+                    </div>
+                    <div>
+                        <label>Pizza (minutes)</label>
+                        <input type="number" name="pizza_time" value="12" min="1" max="45">
+                    </div>
+                    <div>
+                        <label>Pasta (minutes)</label>
+                        <input type="number" name="pasta_time" value="10" min="1" max="30">
+                    </div>
+                    <div>
+                        <label>Salad (minutes)</label>
+                        <input type="number" name="salad_time" value="5" min="1" max="15">
+                    </div>
+                    <div>
+                        <label>Drink (minutes)</label>
+                        <input type="number" name="drink_time" value="2" min="1" max="10">
+                    </div>
+                    <div>
+                        <label>Fries (minutes)</label>
+                        <input type="number" name="fries_time" value="6" min="1" max="20">
+                    </div>
+                    <div>
+                        <label>Dessert (minutes)</label>
+                        <input type="number" name="dessert_time" value="4" min="1" max="15">
+                    </div>
+                    <div>
+                        <label>Default (other items)</label>
+                        <input type="number" name="default_time" value="7" min="1" max="30">
+                    </div>
+                </div>
+
+                <button type="submit" name="action" value="save_times">💾 Save Prep Times</button>
+                
+                <button type="submit">💾 Save All Settings</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Update live preview when inputs change
+        const nameInput = document.getElementById('restaurant_name');
+        const hoursInput = document.getElementById('opening_hours');
+        const logoColor = document.getElementById('logo_color');
+        const accentColor = document.getElementById('accent_color');
+        const logoColorSpan = document.getElementById('logoColorValue');
+        const accentColorSpan = document.getElementById('accentColorValue');
+        const previewBox = document.getElementById('previewBox');
+        const previewName = document.getElementById('previewName');
+        const previewHours = document.getElementById('previewHours');
+        
+        function updatePreview() {
+            previewName.textContent = nameInput.value || 'My Restaurant';
+            previewHours.textContent = hoursInput.value.split('\n')[0] || 'Check hours';
+            previewBox.style.backgroundColor = accentColor.value + '20';
+            previewBox.style.borderLeft = `5px solid ${logoColor.value}`;
+            previewName.style.color = logoColor.value;
+        }
+        
+        nameInput.addEventListener('input', updatePreview);
+        hoursInput.addEventListener('input', updatePreview);
+        logoColor.addEventListener('input', function() {
+            logoColorSpan.textContent = this.value;
+            updatePreview();
+        });
+        accentColor.addEventListener('input', function() {
+            accentColorSpan.textContent = this.value;
+            updatePreview();
+        });
+        
+        // Initial preview
+        updatePreview();
+        
+        // Show color values
+        logoColorSpan.textContent = logoColor.value;
+        accentColorSpan.textContent = accentColor.value;
+    </script>
+</body>
+</html>

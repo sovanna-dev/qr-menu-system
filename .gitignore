@@ -1,0 +1,7 @@
+.env
+orders.db
+backups/
+__pycache__/
+*.pyc
+restaurant.log
+static/uploads/

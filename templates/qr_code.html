@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code Ready</title>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .container { max-width: 600px; margin: auto; background: white; border-radius: 20px; padding: 30px; }
+        img { width: 300px; border: 10px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: 20px 0; }
+        .url { background: #f0f0f0; padding: 10px; border-radius: 5px; font-family: monospace; word-break: break-all; }
+        .btn { background: green; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; margin: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Your QR Code is Ready!</h1>
+        <img src="/static/qrcode.png">
+        <p class="url">{{ menu_url }}</p>
+        <p>✅ Print this QR code and put it on tables</p>
+        <p>✅ Make sure your computer stays ON</p>
+        <p>✅ Customers must be on the same WiFi network</p>
+        <a href="/static/qrcode_big.png" download class="btn">Download Big QR Code</a>
+        <a href="/admin" class="btn" style="background: blue;">← Back to Admin</a>
+    </div>
+</body>
+</html>

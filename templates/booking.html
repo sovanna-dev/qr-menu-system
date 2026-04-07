@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Table Booking - Restaurant</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .booking-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .booking-card {
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .time-slot {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .time-slot:hover {
+            border-color: #667eea;
+        }
+        
+        .time-slot.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .time-slot.unavailable {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .table-select {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            display: none;
+        }
+        
+        .table-select.active {
+            display: block;
+        }
+        
+        .table-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .table-btn {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .table-btn:hover {
+            border-color: #667eea;
+        }
+        
+        .table-btn.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .btn-submit {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .nav {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        
+        @media (max-width: 600px) {
+            .time-slots {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .booking-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="booking-container">
+        <div class="booking-card">
+            <div class="header">
+                <h1>📅 Table Booking</h1>
+                <p>Reserve your table for an amazing dining experience</p>
+            </div>
+            
+            <div id="messageArea"></div>
+            
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label>👤 Your Name *</label>
+                    <input type="text" id="customerName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📞 Phone Number *</label>
+                    <input type="tel" id="customerPhone" placeholder="+855 XX XXX XXXX" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📧 Email (optional)</label>
+                    <input type="email" id="customerEmail" placeholder="your@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>📱 Telegram Username (optional for alerts)</label>
+                    <input type="text" id="telegramUsername" placeholder="@your_username">
+                </div>
+                
+                <div class="form-group">
+                    <label>📅 Select Date *</label>
+                    <input type="date" id="bookingDate" min="" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>👥 Party Size *</label>
+                    <select id="partySize" required>
+                        <option value="1">1 person</option>
+                        <option value="2" selected>2 people</option>
+                        <option value="3">3 people</option>
+                        <option value="4">4 people</option>
+                        <option value="5">5 people</option>
+                        <option value="6">6 people</option>
+                        <option value="7">7 people</option>
+                        <option value="8">8+ people</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>⏰ Select Time *</label>
+                    <div id="timeSlots" class="time-slots">
+                        <div class="loading">Select a date first</div>
+                    </div>
+                </div>
+                
+                <div id="tableSelection" class="table-select">
+                    <label>🪑 Select Table</label>
+                    <div id="tableButtons" class="table-buttons"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>📝 Special Requests</label>
+                    <textarea id="specialRequests" rows="3" placeholder="Any dietary restrictions or special requests?"></textarea>
+                </div>
+                
+                <button type="submit" class="btn-submit">📅 Request Booking</button>
+            </form>
+        </div>
+        
+        <div class="nav">
+            <a href="/menu">← Back to Menu</a>
+            <a href="/">Home</a>
+        </div>
+    </div>
+    
+    <script>
+        // Set min date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('bookingDate').min = today;
+        document.getElementById('bookingDate').value = today;
+        
+        let selectedTime = null;
+        let selectedTable = null;
+        let availableSlots = [];
+        
+        // Load available times when date or party size changes
+        async function loadAvailableTimes() {
+            const date = document.getElementById('bookingDate').value;
+            const partySize = document.getElementById('partySize').value;
+            
+            if (!date) return;
+            
+            const timeSlotsDiv = document.getElementById('timeSlots');
+            timeSlotsDiv.innerHTML = '<div class="loading">Loading available times...</div>';
+            
+            try {
+                const response = await fetch(`/get_available_times?date=${date}&party_size=${partySize}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    timeSlotsDiv.innerHTML = `<div class="error-message">${data.error}</div>`;
+                    return;
+                }
+                
+                availableSlots = data.available_slots;
+                
+                if (availableSlots.length === 0) {
+                    timeSlotsDiv.innerHTML = '<div class="error-message">No available time slots for this date. Please try another date.</div>';
+                    return;
+                }
+                
+                timeSlotsDiv.innerHTML = availableSlots.map(slot => `
+                    <div class="time-slot" data-time="${slot.time}" data-tables='${JSON.stringify(slot.tables)}'>
+                        ${slot.time}<br>
+                        <small>${slot.available_tables} table(s)</small>
+                    </div>
+                `).join('');
+                
+                // Add click handlers
+                document.querySelectorAll('.time-slot').forEach(el => {
+                    el.addEventListener('click', () => selectTime(el));
+                });
+                
+            } catch (error) {
+                timeSlotsDiv.innerHTML = '<div class="error-message">Error loading available times</div>';
+            }
+        }
+        
+        function selectTime(element) {
+            // Remove selected class from all
+            document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+            
+            // Add selected class
+            element.classList.add('selected');
+            selectedTime = element.dataset.time;
+            const tables = JSON.parse(element.dataset.tables);
+            
+            // Show table selection
+            const tableDiv = document.getElementById('tableSelection');
+            const tableButtons = document.getElementById('tableButtons');
+            
+            tableButtons.innerHTML = tables.map(table => `
+                <button type="button" class="table-btn" data-table="${table}">Table ${table}</button>
+            `).join('');
+            
+            tableDiv.classList.add('active');
+            
+            // Add table click handlers
+            document.querySelectorAll('.table-btn').forEach(btn => {
+                btn.addEventListener('click', () => selectTable(btn));
+            });
+        }
+        
+        function selectTable(element) {
+            document.querySelectorAll('.table-btn').forEach(btn => btn.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedTable = element.dataset.table;
+        }
+        
+        // Submit booking
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const customerName = document.getElementById('customerName').value;
+            const customerPhone = document.getElementById('customerPhone').value;
+            const customerEmail = document.getElementById('customerEmail').value;
+            const telegramUsername = document.getElementById('telegramUsername').value;
+            const bookingDate = document.getElementById('bookingDate').value;
+            const partySize = document.getElementById('partySize').value;
+            const specialRequests = document.getElementById('specialRequests').value;
+            
+            if (!customerName || !customerPhone) {
+                showMessage('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            if (!selectedTime) {
+                showMessage('Please select a time slot', 'error');
+                return;
+            }
+            
+            if (!selectedTable) {
+                showMessage('Please select a table', 'error');
+                return;
+            }
+            
+            const submitBtn = document.querySelector('.btn-submit');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+            
+            try {
+                const response = await fetch('/create_booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customer_name: customerName,
+                        customer_phone: customerPhone,
+                        customer_email: customerEmail,
+                        telegram_username: telegramUsername,
+                        booking_date: bookingDate,
+                        booking_time: selectedTime,
+                        party_size: parseInt(partySize),
+                        table_number: parseInt(selectedTable),
+                        special_requests: specialRequests
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    document.getElementById('bookingForm').reset();
+                    document.getElementById('bookingDate').value = today;
+                    selectedTime = null;
+                    selectedTable = null;
+                    document.getElementById('tableSelection').classList.remove('active');
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('Error creating booking', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📅 Request Booking';
+            }
+        });
+        
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('messageArea');
+            messageDiv.innerHTML = `<div class="${type}-message">${message}</div>`;
+            setTimeout(() => messageDiv.innerHTML = '', 5000);
+        }
+        
+        // Event listeners
+        document.getElementById('bookingDate').addEventListener('change', loadAvailableTimes);
+        document.getElementById('partySize').addEventListener('change', loadAvailableTimes);
+        
+        // Initial load
+        loadAvailableTimes();
+    </script>
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Complete Your Payment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .order-summary {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .total-amount {
+            font-size: 36px;
+            font-weight: bold;
+            color: #28a745;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .payment-method {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .payment-method:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .payment-method.selected {
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+        
+        .payment-method img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        
+        .payment-method h3 {
+            margin: 10px 0;
+        }
+        
+        .qr-container {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .qr-container img {
+            width: 250px;
+            height: 250px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .transaction-input {
+            margin-top: 20px;
+        }
+        
+        .transaction-input input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        
+        .confirm-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .confirm-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .instruction {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .order-items {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .order-items li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        @media (max-width: 600px) {
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+            .qr-container img {
+                width: 200px;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>💳 Complete Your Payment</h1>
+            <p>Order #<span id="orderId"></span></p>
+            
+            <div class="order-summary">
+                <h3>📋 Order Summary</h3>
+                <ul class="order-items" id="orderItems"></ul>
+                <div class="total-amount" id="totalAmount">$0.00</div>
+            </div>
+            
+            <h3>Select Payment Method</h3>
+            <div class="payment-methods">
+                <div class="payment-method" data-method="ABA">
+                    <img src="/static/aba_qr.png" alt="ABA Bank" onerror="this.src='https://placehold.co/200x200?text=ABA'">
+                    <h3>ABA Bank</h3>
+                    <p>Scan to pay</p>
+                </div>
+                <div class="payment-method" data-method="ACLEDA">
+                    <img src="/static/acleda_qr.png" alt="ACLEDA" onerror="this.src='https://placehold.co/200x200?text=ACLEDA'">
+                    <h3>ACLEDA</h3>
+                    <p>Scan to pay</p>
+                </div>
+                <div class="payment-method" data-method="Wing">
+                    <img src="/static/wing_qr.png" alt="Wing" onerror="this.src='https://placehold.co/200x200?text=Wing'">
+                    <h3>Wing</h3>
+                    <p>Scan to pay</p>
+                </div>
+            </div>
+            
+            <div id="qrDisplay" style="display: none;">
+                <div class="qr-container">
+                    <h3 id="qrTitle"></h3>
+                    <img id="qrImage" src="" alt="Payment QR Code">
+                    <div class="instruction">
+                        <strong>📱 How to pay:</strong><br>
+                        1. Open your banking app<br>
+                        2. Scan the QR code above<br>
+                        3. Enter amount: <strong id="qrAmount"></strong><br>
+                        4. Complete the payment
+                    </div>
+                    
+                    <div class="transaction-input">
+                        <label>Transaction ID (optional):</label>
+                        <input type="text" id="transactionId" placeholder="Enter transaction ID for faster confirmation">
+                    </div>
+                    
+                    <button class="confirm-btn" onclick="confirmPayment()">
+                        ✅ I Have Completed the Payment
+                    </button>
+                </div>
+            </div>
+            
+            <a href="/menu" class="back-btn">← Back to Menu</a>
+        </div>
+    </div>
+    
+    <script>
+        // Get order data from localStorage
+        const orderData = JSON.parse(localStorage.getItem('pendingOrder') || '{}');
+        
+        if (!orderData.order_id) {
+            alert('No order found! Please place an order first.');
+            window.location.href = '/menu';
+        }
+        
+        // Display order details
+        document.getElementById('orderId').textContent = orderData.order_id;
+        document.getElementById('totalAmount').textContent = `$${orderData.final_total?.toFixed(2) || '0.00'}`;
+        
+        const orderItemsList = document.getElementById('orderItems');
+        if (orderData.items) {
+            orderData.items.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `${item.name} x${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
+                orderItemsList.appendChild(li);
+            });
+        }
+        
+        if (orderData.discount_code && orderData.discount_amount > 0) {
+            const discountLi = document.createElement('li');
+            discountLi.style.color = '#28a745';
+            discountLi.innerHTML = `🏷️ Discount (${orderData.discount_code}): -$${orderData.discount_amount.toFixed(2)}`;
+            orderItemsList.appendChild(discountLi);
+        }
+        
+        // Payment method selection
+        let selectedMethod = null;
+        
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', () => {
+                // Remove selected class from all
+                document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+                // Add selected class to clicked
+                method.classList.add('selected');
+                
+                selectedMethod = method.dataset.method;
+                
+                // Show QR code
+                const qrDisplay = document.getElementById('qrDisplay');
+                const qrTitle = document.getElementById('qrTitle');
+                const qrImage = document.getElementById('qrImage');
+                const qrAmount = document.getElementById('qrAmount');
+                
+                qrDisplay.style.display = 'block';
+                qrTitle.textContent = `${selectedMethod} Payment`;
+                qrImage.src = `/static/${selectedMethod.toLowerCase()}_qr.png`;
+                qrAmount.textContent = `$${orderData.final_total?.toFixed(2) || '0.00'}`;
+                
+                // Handle missing images
+                qrImage.onerror = function() {
+                    this.src = 'https://placehold.co/250x250?text=' + selectedMethod;
+                };
+            });
+        });
+        
+        // Confirm payment
+      // Confirm payment
+        async function confirmPayment() {
+            if (!selectedMethod) {
+                alert('Please select a payment method');
+                return;
+            }
+            
+            const transactionId = document.getElementById('transactionId').value;
+            
+            const confirmBtn = document.querySelector('.confirm-btn');
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Processing...';
+            
+            try {
+                console.log('Sending confirmation for:', orderData.customer_name);
+                
+                const response = await fetch('/confirm_payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customer_name: orderData.customer_name,
+                        payment_method: selectedMethod,
+                        transaction_id: transactionId
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Response:', data);
+                
+                if (data.success) {
+                    alert(`✅ Payment confirmed! Your order is being prepared.\n\nTotal: $${orderData.final_total?.toFixed(2)}\n\nThank you for ordering!`);
+                    
+                    // Clear pending order
+                    localStorage.removeItem('pendingOrder');
+                    
+                    // Redirect to menu with success message
+                    window.location.href = '/menu?paid=true';
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = '✅ I Have Completed the Payment';
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+                alert('Network error. Please try again.');
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '✅ I Have Completed the Payment';
+            }
+        }
+        
+   </script>
+</body>
+</html>
