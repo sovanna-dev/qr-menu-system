@@ -2,7 +2,7 @@ import sys
 import os
 
 # Add your project directory to the path
-path = '/home/eatme/QRMenu'
+path = '6QRMenu'
 if path not in sys.path:
     sys.path.insert(0, path)
 
