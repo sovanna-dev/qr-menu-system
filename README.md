@@ -3,7 +3,7 @@
 ## How to Use
 
 ### Admin Access
-1. Go to: http://your-domain.com/admin
+1. Go to: https://qr-menu-system-5ked.onrender.com/admin
 2. Password: [give them the password]
 
 ### Adding Menu Items
