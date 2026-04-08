@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+
 from flask import Flask, render_template, request, redirect, url_for, jsonify, make_response
 import qrcode
 import os
@@ -118,6 +121,22 @@ def init_db():
             telegram_username TEXT
         )''')
 
+        # Add to init_db() function - Booking tables
+        c.execute('''CREATE TABLE IF NOT EXISTS bookings
+                    (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    customer_name TEXT,
+                    customer_phone TEXT,
+                    customer_email TEXT,
+                    telegram_username TEXT,
+                    booking_date TEXT,
+                    booking_time TEXT,
+                    party_size INTEGER,
+                    table_number INTEGER,
+                    special_requests TEXT,
+                    status TEXT,
+                    created_at TEXT,
+                    updated_at TEXT)''')
+
         # MIGRATION: Ensure all columns exist for existing databases
         try:
             c.execute("PRAGMA table_info(orders)")
@@ -189,20 +208,6 @@ def init_db():
                       address TEXT,
                       logo_color TEXT,
                       accent_color TEXT)''')
-        # Add to init_db() function - Booking tables
-        c.execute('''CREATE TABLE IF NOT EXISTS bookings
-                    (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    customer_name TEXT,
-                    customer_phone TEXT,
-                    customer_email TEXT,
-                    booking_date TEXT,
-                    booking_time TEXT,
-                    party_size INTEGER,
-                    table_number INTEGER,
-                    special_requests TEXT,
-                    status TEXT,
-                    created_at TEXT,
-                    updated_at TEXT)''')
 
         c.execute('''CREATE TABLE IF NOT EXISTS tables
                     (id INTEGER PRIMARY KEY,
